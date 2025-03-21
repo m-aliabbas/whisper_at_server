@@ -1,6 +1,7 @@
 import os
 import tempfile
 import logging
+import sys
 from typing import Optional
 
 import whisper_at as whisper
@@ -11,9 +12,34 @@ import soundfile as sf
 import uvicorn
 from contextlib import asynccontextmanager
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Configure logging to write to both console and file
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("log.txt"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 logger = logging.getLogger(__name__)
+
+# Redirect stdout and stderr to the log file
+class LogRedirector:
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a", buffering=1)  # Line buffered
+    
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+# Redirect stdout and stderr to log.txt
+sys.stdout = LogRedirector("log.txt")
+sys.stderr = LogRedirector("log.txt")
 
 # Global model variable
 MODEL_NAME = "base"  # You can change this to other model sizes: tiny, small, medium, large, etc.
@@ -131,13 +157,13 @@ async def transcribe_audio(
             temperature=0.01,
             no_speech_threshold=0.4
         )
-        print('AT result',result)
-        print(result['segments'],len(result['segments']))
+        print('AT result', result)
+        print(result['segments'], len(result['segments']))
         try:
             no_speech_prob = float(result['segments'][0]['no_speech_prob'])
         except Exception as e:
             no_speech_prob = 0.5 
-            print('Error',e,"Setting to no_speech_prob 0.5")
+            print('Error', e, "Setting to no_speech_prob 0.5")
 
         if no_speech_prob >= 0.4:
             text = ""
@@ -145,7 +171,7 @@ async def transcribe_audio(
             text = result["text"]
        
         logger.info("Transcription completed")
-        print('Final Text',text)
+        print('Final Text', text)
         # Prepare response
         response_data = {
             "text": text,
@@ -172,4 +198,5 @@ async def root():
     return {"message": "Welcome to Whisper-AT Transcription API. Use /transcribe/ endpoint to transcribe audio files."}
 
 if __name__ == "__main__":
+    print("Starting Whisper-AT Transcription Server")
     uvicorn.run("server:app", host="0.0.0.0", port=9007, reload=True)
