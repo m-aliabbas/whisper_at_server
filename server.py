@@ -80,7 +80,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-def process_audio(file_path: str) -> tuple:
+def process_audio(file_path: str,sr1=None) -> tuple:
     """
     Check audio sampling rate and convert if necessary
     
@@ -90,7 +90,8 @@ def process_audio(file_path: str) -> tuple:
     try:
         # Get the audio sampling rate
         audio_data, sample_rate = librosa.load(file_path, sr=None)
-        
+        if sr1:
+            sample_rate = sr1
         logger.info(f"Original audio sampling rate: {sample_rate} Hz")
         
         # If sampling rate is not 16000 Hz, convert it
@@ -176,6 +177,13 @@ async def transcribe_audio(
             no_speech_prob = float(result['segments'][0]['no_speech_prob'])
         except Exception as e:
             no_speech_prob = 0.2
+            processed_file_path, is_processed_temp = process_audio(temp_file_path,sr1=8000)
+            result = model.transcribe(
+            processed_file_path, 
+            at_time_res=audio_tagging_time_resolution,
+            temperature=0.01,
+            no_speech_threshold=0.4
+                ) 
             print('Error', e, "Setting to no_speech_prob 0.5")
         print('Result Text',result['text'])
         if no_speech_prob >= 0.4:
