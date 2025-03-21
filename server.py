@@ -129,13 +129,20 @@ async def transcribe_audio(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
             temperature=0.01,
-            no_speech_threshold=0.35
+            no_speech_threshold=0.4
         )
+        no_speech_prob = float(result['no_speech_prob'])
+
+        if no_speech_prob >= 0.4:
+            text = ""
+        else:
+            text = result["text"]
+
         logger.info("Transcription completed")
         
         # Prepare response
         response_data = {
-            "text": result["text"],
+            "text": text,
             "segments": result.get("segments", []),
             "audio_tags": result.get("audio_tags", [])
         }
