@@ -131,6 +131,7 @@ async def transcribe_audio(
             temperature=0.01,
             no_speech_threshold=0.4
         )
+        print('AT result',result)
         try:
             no_speech_prob = float(result['segments'][0]['no_speech_prob'])
         except Exception as e:
@@ -141,9 +142,9 @@ async def transcribe_audio(
             text = ""
         else:
             text = result["text"]
-
+       
         logger.info("Transcription completed")
-        
+        print('Final Text',text)
         # Prepare response
         response_data = {
             "text": text,
