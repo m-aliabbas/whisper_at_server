@@ -12,34 +12,47 @@ import soundfile as sf
 import uvicorn
 from contextlib import asynccontextmanager
 
-# Configure logging to write to both console and file
+# Configure logging to write to file
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler("log.txt"),
-        logging.StreamHandler(sys.stdout)
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
-# Redirect stdout and stderr to the log file
-class LogRedirector:
-    def __init__(self, filename):
-        self.terminal = sys.stdout
-        self.log = open(filename, "a", buffering=1)  # Line buffered
+# Create a custom log handler for output capturing
+class OutputCapturingHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.setLevel(logging.INFO)
+        self.setFormatter(logging.Formatter('%(asctime)s - PRINT - %(message)s'))
+        self.file_handler = logging.FileHandler("log.txt", mode="a")
     
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-        
-    def flush(self):
-        self.terminal.flush()
-        self.log.flush()
+    def emit(self, record):
+        self.file_handler.emit(record)
 
-# Redirect stdout and stderr to log.txt
-sys.stdout = LogRedirector("log.txt")
-sys.stderr = LogRedirector("log.txt")
+# Setup a logger for print statements
+print_logger = logging.getLogger("print_capture")
+print_logger.setLevel(logging.INFO)
+print_logger.addHandler(OutputCapturingHandler())
+
+# Save the original print function
+original_print = print
+
+# Define a custom print function
+def custom_print(*args, **kwargs):
+    # Call the original print function
+    original_print(*args, **kwargs)
+    
+    # Log the print statement
+    message = " ".join(str(arg) for arg in args)
+    print_logger.info(message)
+
+# Replace the built-in print with our custom print
+sys.modules['builtins'].print = custom_print
 
 # Global model variable
 MODEL_NAME = "base"  # You can change this to other model sizes: tiny, small, medium, large, etc.
