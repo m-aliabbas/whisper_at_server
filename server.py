@@ -9,25 +9,37 @@ from fastapi.responses import JSONResponse
 import librosa
 import soundfile as sf
 import uvicorn
+from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Whisper-AT Transcription API", 
-              description="API for transcribing audio files with Whisper-AT",
-              version="1.0.0")
-
-# Load model once at startup for better performance
+# Global model variable
 MODEL_NAME = "base"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
 
-@app.on_event("startup")
-async def startup_event():
+# Define lifespan context manager (replaces on_event)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Load model
     global model
     logger.info(f"Loading Whisper-AT model: {MODEL_NAME}")
     model = whisper.load_model(MODEL_NAME)
     logger.info("Model loaded successfully")
+    
+    yield  # This is where FastAPI serves requests
+    
+    # Shutdown: Add any cleanup code here if needed
+    logger.info("Shutting down application")
+
+# Create FastAPI app with lifespan
+app = FastAPI(
+    title="Whisper-AT Transcription API", 
+    description="API for transcribing audio files with Whisper-AT",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 def process_audio(file_path: str) -> tuple:
     """
@@ -147,4 +159,4 @@ async def root():
     return {"message": "Welcome to Whisper-AT Transcription API. Use /transcribe/ endpoint to transcribe audio files."}
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=9007, reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=9007, reload=True)
