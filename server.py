@@ -192,6 +192,16 @@ async def transcribe_audio(
             text = result["text"]
        
         logger.info("Transcription completed")
+
+        if len(text) <= 10:
+            text = text.lower()
+            text = text.strip()
+
+            if text == 'you':
+                text = ''
+            elif 'the' in text:
+                text = ''
+            
         print('Final Text', text)
         # Prepare response
         response_data = {
