@@ -128,8 +128,8 @@ async def transcribe_audio(
         result = model.transcribe(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
-            temperature=temperature,
-            no_speech_threshold=no_speech_threshold
+            temperature=0.01,
+            no_speech_threshold=0.35
         )
         logger.info("Transcription completed")
         
