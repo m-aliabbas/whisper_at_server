@@ -132,6 +132,7 @@ async def transcribe_audio(
             no_speech_threshold=0.4
         )
         print('AT result',result)
+        print(result['segments'],len(result['segments']))
         try:
             no_speech_prob = float(result['segments'][0]['no_speech_prob'])
         except Exception as e:
