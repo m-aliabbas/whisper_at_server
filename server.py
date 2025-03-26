@@ -196,8 +196,7 @@ async def transcribe_audio(
         text = text.lower()
         text = text.strip()
 
-        if 'bye bye' in text:
-            return ''
+   
 
         if len(text) <= 10:
             
@@ -206,8 +205,7 @@ async def transcribe_audio(
             elif 'the' in text:
                 text = ''
 
-            elif 'bye bye' in text:
-                text = ''
+        
             
         print('Final Text', text)
         # Prepare response
