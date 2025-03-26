@@ -201,7 +201,6 @@ async def transcribe_audio(
 
         if len(text) <= 10:
             
-
             if text == 'you':
                 text = ''
             elif 'the' in text:
