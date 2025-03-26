@@ -193,13 +193,21 @@ async def transcribe_audio(
        
         logger.info("Transcription completed")
 
+        text = text.lower()
+        text = text.strip()
+
+        if 'bye bye' in text:
+            return ''
+
         if len(text) <= 10:
-            text = text.lower()
-            text = text.strip()
+            
 
             if text == 'you':
                 text = ''
             elif 'the' in text:
+                text = ''
+
+            elif 'bye bye' in text:
                 text = ''
             
         print('Final Text', text)
