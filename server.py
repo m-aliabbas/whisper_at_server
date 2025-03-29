@@ -181,12 +181,12 @@ async def transcribe_audio(
             result = model.transcribe(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
-            temperature=0.01,
-            no_speech_threshold=0.4
+            temperature=0,
+            no_speech_threshold=no_speech_prob
                 ) 
             print('Error', e, "Setting to no_speech_prob 0.5")
         print('Result Text',result['text'])
-        if no_speech_prob >= 0.4:
+        if no_speech_prob >= 0.3:
             text = ""
         else:
             text = result["text"]
