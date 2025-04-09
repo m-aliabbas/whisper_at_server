@@ -37,20 +37,22 @@ pip install -r requirements.txt
 1. Start the server:
 
 ```bash
-python app.py
+python server.py
 ```
 
-The server will be available at `http://localhost:8000` by default.
+
+
+The server will be available at `http://localhost:9007` by default.
 
 2. Access the interactive API documentation:
 
-Open your browser and navigate to `http://localhost:8000/docs`
+Open your browser and navigate to `http://localhost:9007/docs`
 
 3. Send requests to the API:
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:8000/transcribe/' \
+  'http://localhost:9007/transcribe/' \
   -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
   -F 'file=@your_audio_file.wav' \
@@ -84,7 +86,7 @@ Transcribes an audio file and returns the transcribed text along with segments a
 
 ## Environment Variables
 
-None required for basic functionality. The server runs on port 8000 by default.
+None required for basic functionality. The server runs on port 9007 by default.
 
 ## Dependencies
 
