@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  whisper-at-server:
+    image: maliabbas1/whisper-at-server:latest  # Replace with your actual image if different
+    container_name: whisper-at-server
+    ports:
+      - "9007:9007"
+    networks:
+      whisper-net:
+        aliases:
+          - backend9007
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    volumes:
+      - ./temp:/workspace/temp
+    restart: unless-stopped
+    command: uvicorn server:app --host 0.0.0.0 --port 9007 --workers 7
+
+networks:
+  whisper-net:
+    driver: bridge
