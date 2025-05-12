@@ -233,6 +233,39 @@ async def transcribe_audio(
 async def root():
     return {"message": "Welcome to Whisper-AT Transcription API. Use /transcribe/ endpoint to transcribe audio files."}
 
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint that verifies model is working by transcribing a test file.
+    Returns 200 if transcription is successful, 503 otherwise.
+    """
+    try:
+        test_file_path = "test.wav"  # Make sure this file exists in the same directory
+        if not os.path.exists(test_file_path):
+            raise FileNotFoundError("Test file not found")
+
+        processed_file_path, is_temp = process_audio(test_file_path)
+        result = model.transcribe(
+            processed_file_path, 
+            at_time_res=10,
+            temperature=0.01,
+            no_speech_threshold=0.4
+        )
+
+        text = result.get("text", "").strip().lower()
+        if not text or len(text) < 2:
+            raise ValueError("Transcription too short or empty")
+
+        if is_temp and os.path.exists(processed_file_path):
+            os.unlink(processed_file_path)
+
+        return {"status": "ok", "text": text}
+
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
+
 if __name__ == "__main__":
     print("Starting Whisper-AT Transcription Server")
     uvicorn.run("server:app", host="0.0.0.0", port=9007, reload=True)
