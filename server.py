@@ -169,7 +169,7 @@ async def transcribe_audio(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
             temperature=0.01,
-            no_speech_threshold=0.25
+            no_speech_threshold=0.5
         )
 
         audio_tag_result = whisper.parse_at_label(result, language='en', top_k=1, p_threshold=-3, include_class_list=list(range(527)))
