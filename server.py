@@ -55,7 +55,7 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Global model variable
-MODEL_NAME = "base"  # You can change this to other model sizes: tiny, small, medium, large, etc.
+MODEL_NAME = "small.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
 
 # Define lifespan context manager (replaces on_event)
@@ -121,7 +121,7 @@ def process_audio(file_path: str,sr1=None) -> tuple:
 @app.post("/transcribe/", response_class=JSONResponse)
 async def transcribe_audio(
     file: UploadFile = File(...),
-    audio_tagging_time_resolution: Optional[int] = Form(10),
+    audio_tagging_time_resolution: Optional[int] = Form(4.0),
     temperature: Optional[float] = Form(0.01),
     no_speech_threshold: Optional[float] = Form(0.4)
 ):
@@ -169,50 +169,16 @@ async def transcribe_audio(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
             temperature=0.01,
-            no_speech_threshold=0.4
+            no_speech_threshold=0.25
         )
-        # print('AT result', result)
-        # print(result['segments'], len(result['segments']))
-        try:
-            no_speech_prob = float(result['segments'][0]['no_speech_prob'])
-        except Exception as e:
-            no_speech_prob = 0.2
-            processed_file_path, is_processed_temp = process_audio(temp_file_path,sr1=8000)
-            result = model.transcribe(
-            processed_file_path, 
-            at_time_res=audio_tagging_time_resolution,
-            temperature=0,
-            no_speech_threshold=no_speech_prob
-                ) 
-            print('Error', e, "Setting to no_speech_prob 0.5")
-        print('Result Text',result['text'])
-        if no_speech_prob >= 0.3:
-            text = ""
-        else:
-            text = result["text"]
-       
-        logger.info("Transcription completed")
 
-        text = text.lower()
-        text = text.strip()
-
-   
-
-        if len(text) <= 10:
-            
-            if text == 'you':
-                text = ''
-            elif 'the' in text:
-                text = ''
-
-        
-            
-        print('Final Text', text)
+        audio_tag_result = whisper.parse_at_label(result, language='en', top_k=1, p_threshold=-3, include_class_list=list(range(527)))
+        text = result.get('text','')
         # Prepare response
         response_data = {
             "text": text,
             "segments": result.get("segments", []),
-            "audio_tags": result.get("audio_tags", [])
+            "audio_tags": audio_tag_result
         }
         
         return JSONResponse(content=response_data)
