@@ -55,7 +55,7 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Global model variable
-MODEL_NAME = "base.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
+MODEL_NAME = "small.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
 
 # Define lifespan context manager (replaces on_event)

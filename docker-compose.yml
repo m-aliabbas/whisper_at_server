@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   whisper-at-server:
-    image: maliabbas1/whisper-at-server:latest  # Replace with your actual image if different
+    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/v5_lines/whisper-at-server:v1.0.3
     container_name: whisper-at-server
     ports:
       - "9007:9007"
@@ -12,6 +12,7 @@ services:
           - backend9007
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - WORKERS=4  # 👈 You can now change this in one place
     deploy:
       resources:
         reservations:
@@ -20,7 +21,7 @@ services:
     volumes:
       - ./temp:/workspace/temp
     restart: unless-stopped
-    command: uvicorn server:app --host 0.0.0.0 --port 9007 --workers 7
+    command: sh -c "uvicorn server:app --host 0.0.0.0 --port 9007 --workers ${WORKERS}"
 
 networks:
   whisper-net:
