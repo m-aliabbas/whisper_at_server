@@ -11,7 +11,7 @@ import librosa
 import soundfile as sf
 import uvicorn
 from contextlib import asynccontextmanager
-
+from utils import post_process_response_data
 # Configure logging to write to file
 logging.basicConfig(
     level=logging.INFO,
@@ -55,7 +55,7 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Global model variable
-MODEL_NAME = "medium.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
+MODEL_NAME = "base.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
 
 # Define lifespan context manager (replaces on_event)
@@ -162,7 +162,7 @@ async def transcribe_audio(
         
         # Process the audio file (check sampling rate and convert if needed)
         processed_file_path, is_processed_temp = process_audio(temp_file_path)
-        
+
         # Transcribe using Whisper-AT
         logger.info("Starting transcription...")
         result = model.transcribe(
@@ -180,8 +180,8 @@ async def transcribe_audio(
             "segments": result.get("segments", []),
             "audio_tags": audio_tag_result
         }
-        
-        return JSONResponse(content=response_data)
+        results_response = post_process_response_data(response_data)
+        return JSONResponse(content=results_response)
     
     except Exception as e:
         logger.error(f"Error during transcription: {str(e)}")
