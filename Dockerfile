@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirments.txt
 COPY . .
 
 # At the end of your Dockerfile
-RUN python3 -c "import whisper_at; whisper_at.load_model('medium.en')"
+RUN python3 -c "import whisper_at; whisper_at.load_model('small.en')"
 
 
 EXPOSE 9007
