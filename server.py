@@ -56,7 +56,7 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Global model variable
-MODEL_NAME = "tiny.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
+MODEL_NAME = "small.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
