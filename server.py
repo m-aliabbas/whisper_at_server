@@ -12,6 +12,7 @@ import soundfile as sf
 import uvicorn
 from contextlib import asynccontextmanager
 from utils import post_process_response_data
+import torch
 # Configure logging to write to file
 logging.basicConfig(
     level=logging.INFO,
@@ -55,15 +56,22 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Global model variable
-MODEL_NAME = "small.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
+MODEL_NAME = "tiny.en"  # You can change this to other model sizes: tiny, small, medium, large, etc.
 model = None
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+if device == "cuda":
+    logger.info("CUDA is available. Using GPU for inference.")
+else:
+    logger.info("CUDA is not available. Using CPU for inference.")
 
 # Define lifespan context manager (replaces on_event)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Load model
     global model
-    logger.info(f"Loading Whisper-AT model: {MODEL_NAME}")
+    logger.info(f"Loading Whisper-AT model")
     model = whisper.load_model(MODEL_NAME)
     logger.info("Model loaded successfully")
     

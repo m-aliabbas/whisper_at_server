@@ -5,7 +5,7 @@ WORKDIR /workspace
 
 # Install Python, pip, and ffmpeg
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip ffmpeg && \
+    apt-get install -y python3 python3-pip ffmpeg curl && \
     ln -s /usr/bin/python3 /usr/bin/python && \
     pip install --upgrade pip
 
@@ -17,9 +17,10 @@ RUN pip install --no-cache-dir -r requirments.txt
 COPY . .
 
 # At the end of your Dockerfile
-RUN python3 -c "import whisper_at; whisper_at.load_model('medium.en')"
+RUN python3 -c "import whisper_at; whisper_at.load_model('tiny.en')"
 
+RUN pip install -U torch
 
 EXPOSE 9007
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "9007", "--workers", "4"]
+CMD ["sh", "-c", "uvicorn server:app --host :: --port ${PORT:-9007} --workers ${WORKERS:-4}"]

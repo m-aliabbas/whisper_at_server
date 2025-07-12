@@ -1,28 +1,28 @@
 version: '3.8'
 
 services:
-  whisper-at-server:
-    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/v5_lines/whisper-at-server:v1.0.3
+    whisper-at-server:
+    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/v5_lines/whisper-at-server:v1.1.7
     container_name: whisper-at-server
     ports:
       - "9007:9007"
     networks:
-      whisper-net:
-        aliases:
-          - backend9007
+      - whisper-net
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - WORKERS=4  # 👈 You can now change this in one place
+      WORKERS: 4
+      PORT: 9007
     deploy:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
-    volumes:
-      - ./temp:/workspace/temp
-    restart: unless-stopped
-    command: sh -c "uvicorn server:app --host 0.0.0.0 --port 9007 --workers ${WORKERS}"
+            - driver: nvidia
+              capabilities: [gpu]
+    
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9007/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
-networks:
-  whisper-net:
-    driver: bridge
