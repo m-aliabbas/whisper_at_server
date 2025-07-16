@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   whisper-at-server:
-    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/v5_lines/whisper-at-server:v1.0.3
+    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/v5_lines/whisper-at-server:v1.0.16
     container_name: whisper-at-server
     ports:
       - "9007:9007"
