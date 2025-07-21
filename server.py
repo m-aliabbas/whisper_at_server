@@ -49,7 +49,7 @@ def custom_print(*args, **kwargs):
 sys.modules['builtins'].print = custom_print
 
 # Load Whisper-AT model
-MODEL_NAME = "tiny"
+MODEL_NAME = "medium.en"
 model = None
 
 @asynccontextmanager
@@ -65,7 +65,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Whisper-AT Transcription API", 
     description="API for transcribing audio files with Whisper-AT",
-    version="1.0.17",
+    version="1.0.18",
     lifespan=lifespan
 )
 
@@ -143,14 +143,14 @@ async def transcribe_audio(
 
         # Process audio
         processed_file_path, is_processed_temp = process_audio(temp_file_path)
-
+    
         # Transcribe
         logger.info("Starting transcription...")
         result = model.transcribe(
             processed_file_path,
             at_time_res=audio_tagging_time_resolution,
-            temperature=temperature,
-            no_speech_threshold=no_speech_threshold
+            temperature=0.0,
+            no_speech_threshold=no_speech_threshold,
         )
 
         audio_tag_result = whisper.parse_at_label(

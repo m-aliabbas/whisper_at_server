@@ -173,7 +173,7 @@ async def transcribe_audio(
             processed_file_path, 
             at_time_res=audio_tagging_time_resolution,
             temperature=0.01,
-            no_speech_threshold=0.6
+            no_speech_threshold=0.6, 
         )
 
         audio_tag_result = whisper.parse_at_label(result, language='en', top_k=1, p_threshold=-3, include_class_list=list(range(527)))
@@ -228,7 +228,7 @@ async def health_check():
         text = result.get("text", "").strip().lower()
         if not text or len(text) < 2:
             raise ValueError("Transcription too short or empty")
-
+        
         if is_temp and os.path.exists(processed_file_path):
             os.unlink(processed_file_path)
 
